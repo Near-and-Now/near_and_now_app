@@ -94,3 +94,4 @@ expo start -c
 - All color schemes and design match the web application
 - The app uses AsyncStorage for local data persistence (cart, etc.)
 
+

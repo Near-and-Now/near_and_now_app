@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Near & Now Admin",
+    "slug": "near-and-now-admin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "entryPoint": "./admin/index.ts",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nearandnow.admin"
+    },
+    "android": {
+      "package": "com.nearandnow.admin"
+    },
+    "web": {},
+    "plugins": [
+      "expo-location"
+    ]
+  }
+}
+
+

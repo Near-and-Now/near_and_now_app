@@ -190,3 +190,4 @@ For issues or questions, refer to:
 - React Navigation: https://reactnavigation.org
 - Supabase: https://supabase.com/docs
 
+
