@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +6,7 @@ import '../../features/shop/screens/shop_screen.dart';
 import '../../features/cart/screens/cart_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/providers/auth_provider.dart';
 import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/products/screens/category_screen.dart';
 import '../../features/search/screens/search_screen.dart';
@@ -18,8 +18,27 @@ import '../../features/about/screens/about_screen.dart';
 import '../widgets/main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Watch authentication state
+  final isAuthenticated = ref.watch(isAuthenticatedProvider);
+  
   return GoRouter(
     initialLocation: '/',
+    redirect: (context, state) {
+      final isLoggingIn = state.matchedLocation == '/login';
+      
+      // If not authenticated and not already on login page, redirect to login
+      if (!isAuthenticated && !isLoggingIn) {
+        return '/login';
+      }
+      
+      // If authenticated and on login page, redirect to home
+      if (isAuthenticated && isLoggingIn) {
+        return '/';
+      }
+      
+      // No redirect needed
+      return null;
+    },
     routes: [
       // Main navigation with bottom bar
       ShellRoute(

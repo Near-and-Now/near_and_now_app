@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/user_model.dart';
 
-// Auth state provider
+// Auth state provider - watches real-time auth changes
 final authStateProvider = StreamProvider<AuthState>((ref) {
   return SupabaseService().authStateChanges;
 });
@@ -13,9 +13,15 @@ final currentUserProvider = FutureProvider<UserModel?>((ref) async {
   return await SupabaseService().getCurrentUser();
 });
 
-// Is authenticated provider
+// Is authenticated provider - reacts to auth state changes
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  return SupabaseService().isAuthenticated;
+  final authState = ref.watch(authStateProvider);
+  
+  return authState.when(
+    data: (state) => state.session != null,
+    loading: () => false,
+    error: (_, __) => false,
+  );
 });
 
 // Auth service provider

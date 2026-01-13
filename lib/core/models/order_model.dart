@@ -15,10 +15,10 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['product_id'] as String,
-      name: json['name'] as String,
+      productId: json['product_id'] as String? ?? 'unknown',
+      name: json['name'] as String? ?? 'Unknown Product',
       price: _parseDouble(json['price']),
-      quantity: json['quantity'] as int,
+      quantity: (json['quantity'] as int?) ?? 1,
       image: json['image'] as String?,
     );
   }
@@ -50,18 +50,21 @@ class ShippingAddress {
   final String pincode;
 
   ShippingAddress({
-    required this.address,
-    required this.city,
-    required this.state,
-    required this.pincode,
-  });
+    String? address,
+    String? city,
+    String? state,
+    String? pincode,
+  }) : address = address ?? 'Not provided',
+       city = city ?? 'Not provided',
+       state = state ?? 'Not provided',
+       pincode = pincode ?? '000000';
 
   factory ShippingAddress.fromJson(Map<String, dynamic> json) {
     return ShippingAddress(
-      address: json['address'] as String,
-      city: json['city'] as String,
-      state: json['state'] as String,
-      pincode: json['pincode'] as String,
+      address: json['address'] as String?,
+      city: json['city'] as String?,
+      state: json['state'] as String?,
+      pincode: json['pincode'] as String?,
     );
   }
 
@@ -142,12 +145,12 @@ class Order {
   Order({
     required this.id,
     this.userId,
-    required this.customerName,
+    String? customerName,
     this.customerEmail,
     this.customerPhone,
     required this.orderStatus,
     required this.paymentStatus,
-    required this.paymentMethod,
+    String? paymentMethod,
     required this.orderTotal,
     this.subtotal,
     this.deliveryFee,
@@ -157,13 +160,14 @@ class Order {
     required this.createdAt,
     this.updatedAt,
     this.orderNumber,
-  });
+  }) : customerName = customerName ?? 'Guest Customer',
+       paymentMethod = paymentMethod ?? 'Cash on Delivery';
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id'] as String,
       userId: json['user_id'] as String?,
-      customerName: json['customer_name'] as String,
+      customerName: json['customer_name'] as String?,
       customerEmail: json['customer_email'] as String?,
       customerPhone: json['customer_phone'] as String?,
       orderStatus: OrderStatus.values.firstWhere(
@@ -174,7 +178,7 @@ class Order {
         (e) => e.name == json['payment_status'],
         orElse: () => PaymentStatus.pending,
       ),
-      paymentMethod: json['payment_method'] as String,
+      paymentMethod: json['payment_method'] as String?,
       orderTotal: _parseDouble(json['order_total']),
       subtotal: json['subtotal'] != null ? _parseDouble(json['subtotal']) : null,
       deliveryFee:

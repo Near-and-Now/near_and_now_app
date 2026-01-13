@@ -200,6 +200,12 @@ class SupabaseService {
   }) async {
     try {
       print('🛒 Creating order...');
+      print('   Customer: $customerName');
+      print('   Phone: $customerPhone');
+      print('   Email: $customerEmail');
+      print('   User ID: $userId');
+      print('   Total: ₹$orderTotal');
+      print('   Items: ${items.length}');
 
       // Generate order number
       final orderNumber = await _generateOrderNumber();
@@ -217,22 +223,30 @@ class SupabaseService {
         'subtotal': subtotal,
         'delivery_fee': deliveryFee,
         'items': items.map((item) => item.toJson()).toList(),
+        'items_count': items.length,
         'shipping_address': shippingAddress.toJson(),
         'order_number': orderNumber,
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
 
+      print('💾 Inserting order into database...');
       final response = await _client
           .from('orders')
           .insert(orderPayload)
           .select()
           .single();
 
-      print('✅ Order created successfully');
-      return Order.fromJson(response);
-    } catch (error) {
+      final createdOrder = Order.fromJson(response);
+      print('✅ Order created successfully!');
+      print('   Order ID: ${createdOrder.id}');
+      print('   Order Number: ${createdOrder.orderNumber}');
+      print('   Stored with phone: ${createdOrder.customerPhone}');
+      
+      return createdOrder;
+    } catch (error, stackTrace) {
       print('❌ Error in createOrder: $error');
+      print('   Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -263,68 +277,158 @@ class SupabaseService {
   }) async {
     try {
       print('📦 Fetching orders for user...');
+      print('   User ID: $userId');
+      print('   User Phone: $userPhone');
+      print('   User Email: $userEmail');
 
       final Set<String> orderIds = {};
       final List<Order> allOrders = [];
 
       // Query by user_id
       if (userId != null && userId.isNotEmpty) {
-        final response = await _client
-            .from('orders')
-            .select()
-            .eq('user_id', userId)
-            .order('created_at', ascending: false);
+        try {
+          final response = await _client
+              .from('orders')
+              .select()
+              .eq('user_id', userId)
+              .order('created_at', ascending: false);
 
-        for (var orderJson in response) {
-          final order = Order.fromJson(orderJson);
-          if (!orderIds.contains(order.id)) {
-            orderIds.add(order.id);
-            allOrders.add(order);
+          print('   Found ${response.length} orders by user_id');
+          
+          for (var orderJson in response) {
+            try {
+              final order = Order.fromJson(orderJson);
+              if (!orderIds.contains(order.id)) {
+                orderIds.add(order.id);
+                allOrders.add(order);
+              }
+            } catch (parseError) {
+              print('   ⚠️ Error parsing order: $parseError');
+            }
           }
+        } catch (queryError) {
+          print('   ⚠️ Error querying by user_id: $queryError');
         }
       }
 
-      // Query by phone
+      // Query by phone (try multiple formats)
       if (userPhone != null && userPhone.isNotEmpty) {
-        final response = await _client
-            .from('orders')
-            .select()
-            .eq('customer_phone', userPhone)
-            .order('created_at', ascending: false);
+        // Try exact match first
+        try {
+          final response = await _client
+              .from('orders')
+              .select()
+              .eq('customer_phone', userPhone)
+              .order('created_at', ascending: false);
 
-        for (var orderJson in response) {
-          final order = Order.fromJson(orderJson);
-          if (!orderIds.contains(order.id)) {
-            orderIds.add(order.id);
-            allOrders.add(order);
+          print('   Found ${response.length} orders by phone (exact: $userPhone)');
+          
+          for (var orderJson in response) {
+            try {
+              final order = Order.fromJson(orderJson);
+              if (!orderIds.contains(order.id)) {
+                orderIds.add(order.id);
+                allOrders.add(order);
+              }
+            } catch (parseError) {
+              print('   ⚠️ Error parsing order: $parseError');
+            }
+          }
+        } catch (queryError) {
+          print('   ⚠️ Error querying by phone: $queryError');
+        }
+
+        // If phone has +91, also try without it
+        if (userPhone.startsWith('+91')) {
+          final phoneWithoutPrefix = userPhone.substring(3);
+          try {
+            final response = await _client
+                .from('orders')
+                .select()
+                .eq('customer_phone', phoneWithoutPrefix)
+                .order('created_at', ascending: false);
+
+            print('   Found ${response.length} orders by phone (without +91: $phoneWithoutPrefix)');
+            
+            for (var orderJson in response) {
+              try {
+                final order = Order.fromJson(orderJson);
+                if (!orderIds.contains(order.id)) {
+                  orderIds.add(order.id);
+                  allOrders.add(order);
+                }
+              } catch (parseError) {
+                print('   ⚠️ Error parsing order: $parseError');
+              }
+            }
+          } catch (queryError) {
+            print('   ⚠️ Error querying by phone without prefix: $queryError');
+          }
+        } 
+        // If phone doesn't have +91, also try with it
+        else if (!userPhone.startsWith('+')) {
+          final phoneWithPrefix = '+91$userPhone';
+          try {
+            final response = await _client
+                .from('orders')
+                .select()
+                .eq('customer_phone', phoneWithPrefix)
+                .order('created_at', ascending: false);
+
+            print('   Found ${response.length} orders by phone (with +91: $phoneWithPrefix)');
+            
+            for (var orderJson in response) {
+              try {
+                final order = Order.fromJson(orderJson);
+                if (!orderIds.contains(order.id)) {
+                  orderIds.add(order.id);
+                  allOrders.add(order);
+                }
+              } catch (parseError) {
+                print('   ⚠️ Error parsing order: $parseError');
+              }
+            }
+          } catch (queryError) {
+            print('   ⚠️ Error querying by phone with prefix: $queryError');
           }
         }
       }
 
       // Query by email
       if (userEmail != null && userEmail.isNotEmpty) {
-        final response = await _client
-            .from('orders')
-            .select()
-            .eq('customer_email', userEmail)
-            .order('created_at', ascending: false);
+        try {
+          final response = await _client
+              .from('orders')
+              .select()
+              .eq('customer_email', userEmail)
+              .order('created_at', ascending: false);
 
-        for (var orderJson in response) {
-          final order = Order.fromJson(orderJson);
-          if (!orderIds.contains(order.id)) {
-            orderIds.add(order.id);
-            allOrders.add(order);
+          print('   Found ${response.length} orders by email');
+          
+          for (var orderJson in response) {
+            try {
+              final order = Order.fromJson(orderJson);
+              if (!orderIds.contains(order.id)) {
+                orderIds.add(order.id);
+                allOrders.add(order);
+              }
+            } catch (parseError) {
+              print('   ⚠️ Error parsing order: $parseError');
+            }
           }
+        } catch (queryError) {
+          print('   ⚠️ Error querying by email: $queryError');
         }
       }
 
       // Sort by created_at descending
       allOrders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      print('✅ Fetched ${allOrders.length} orders');
+      print('✅ Fetched ${allOrders.length} total unique orders');
       return allOrders;
-    } catch (error) {
+    } catch (error, stackTrace) {
       print('❌ Error in getUserOrders: $error');
+      print('   Stack trace: $stackTrace');
       rethrow;
     }
   }

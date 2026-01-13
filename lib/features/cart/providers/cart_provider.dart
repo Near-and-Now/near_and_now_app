@@ -5,8 +5,8 @@ import '../../../core/models/cart_item_model.dart';
 import '../../../core/models/product_model.dart';
 import '../../../core/config/app_config.dart';
 
-// Cart provider
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
+// Cart provider (Riverpod 3.x uses Notifier instead of StateNotifier)
+final cartProvider = NotifierProvider<CartNotifier, List<CartItem>>(() {
   return CartNotifier();
 });
 
@@ -35,9 +35,11 @@ final grandTotalProvider = Provider<double>((ref) {
   return subtotal + deliveryFee;
 });
 
-class CartNotifier extends StateNotifier<List<CartItem>> {
-  CartNotifier() : super([]) {
+class CartNotifier extends Notifier<List<CartItem>> {
+  @override
+  List<CartItem> build() {
     _loadCart();
+    return [];
   }
 
   static const String _cartKey = 'cart_items';
