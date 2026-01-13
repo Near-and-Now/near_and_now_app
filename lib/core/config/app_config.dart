@@ -19,5 +19,10 @@ class AppConfig {
   // Pagination
   static const int productsPerPage = 20;
   static const int ordersPerPage = 10;
+  
+  // Location settings
+  static const int locationCacheDurationMs = 86400000; // 24 hours
+  static const double searchRadiusKm = 1.0;
+  static const int maxSavedAddresses = 5;
 }
 

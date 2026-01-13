@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/product_model.dart';
+import '../../../core/models/category_model.dart';
 import '../../../core/services/supabase_service.dart';
 
 // Products service provider
@@ -35,14 +36,18 @@ final productByIdProvider =
   return await service.getProductById(productId);
 });
 
-// Categories provider (derived from all products)
-final categoriesProvider = FutureProvider<List<String>>((ref) async {
-  final productsAsync = ref.watch(allProductsProvider);
-  return productsAsync.when(
-    data: (products) {
-      final categories = products.map((p) => p.category).toSet().toList();
-      categories.sort();
-      return categories;
+// Categories provider with images from database
+final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final service = ref.read(productsServiceProvider);
+  return await service.getAllCategories();
+});
+
+// Legacy categories provider (just names) - for backward compatibility
+final categoryNamesProvider = FutureProvider<List<String>>((ref) async {
+  final categoriesAsync = ref.watch(categoriesProvider);
+  return categoriesAsync.when(
+    data: (categories) {
+      return categories.map((c) => c['name'] as String).toList();
     },
     loading: () => [],
     error: (_, __) => [],

@@ -24,7 +24,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
   @override
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(allProductsProvider);
-    final categoriesAsync = ref.watch(categoriesProvider);
+    final categoriesAsync = ref.watch(categoryNamesProvider);
 
     return Scaffold(
       appBar: AppBar(

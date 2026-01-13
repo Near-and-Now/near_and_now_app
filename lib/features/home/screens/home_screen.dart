@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/product_card.dart';
+import '../../../core/widgets/location_widget.dart';
 import '../../../core/utils/formatters.dart';
 import '../../products/providers/products_provider.dart';
 
@@ -18,7 +20,46 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Near & Now'),
+        titleSpacing: 8,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // App Logo
+            Image.asset(
+              'assets/logo/Logo.png',
+              height: 36,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                // Fallback to emoji if image fails
+                return const Text('🏪', style: TextStyle(fontSize: 28));
+              },
+            ),
+            const SizedBox(width: 8),
+            const Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Near & Now',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Digital Dukan, Local Dil Se',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -36,6 +77,12 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Location widget
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: LocationWidget(),
+              ),
+              
               // Header Banner
               _buildHeaderBanner(context),
               
@@ -160,44 +207,86 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoriesGrid(BuildContext context, List<String> categories) {
+  Widget _buildCategoriesGrid(BuildContext context, List<Map<String, dynamic>> categories) {
     return SizedBox(
-      height: 100,
+      height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
+          final categoryName = category['name'] as String;
+          final imageUrl = category['image_url'] as String?;
+          
           return GestureDetector(
-            onTap: () => context.push('/category/$category'),
+            onTap: () => context.push('/category/$categoryName'),
             child: Container(
               width: 100,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    _getCategoryIcon(category),
-                    size: 32,
-                    color: AppColors.primary,
+                  // Category image or icon
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: imageUrl != null && imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Center(
+                                child: Icon(
+                                  _getCategoryIcon(categoryName),
+                                  size: 32,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Icon(
+                                _getCategoryIcon(categoryName),
+                                size: 32,
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : Icon(
+                              _getCategoryIcon(categoryName),
+                              size: 32,
+                              color: AppColors.primary,
+                            ),
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    Formatters.formatCategoryName(category),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      Formatters.formatCategoryName(categoryName),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

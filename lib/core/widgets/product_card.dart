@@ -164,29 +164,74 @@ class ProductCard extends ConsumerWidget {
                         ),
                         // Add to cart button
                         if (product.inStock)
-                          Material(
-                            color: isInCart ? AppColors.primary : AppColors.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            child: InkWell(
-                              onTap: () {
-                                if (!isInCart) {
-                                  ref.read(cartProvider.notifier).addItem(product);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('${product.name} added to cart'),
-                                      duration: const Duration(seconds: 1),
-                                      backgroundColor: AppColors.success,
-                                    ),
-                                  );
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Icon(
-                                  isInCart ? Icons.check : Icons.add,
-                                  size: 20,
-                                  color: isInCart ? Colors.white : AppColors.primary,
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            decoration: BoxDecoration(
+                              color: isInCart ? AppColors.success : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isInCart ? AppColors.success : AppColors.primary,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isInCart ? AppColors.success : AppColors.primary).withOpacity(0.2),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  if (!isInCart) {
+                                    ref.read(cartProvider.notifier).addItem(product);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Row(
+                                          children: [
+                                            const Icon(Icons.check_circle, color: Colors.white),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text('${product.name} added to cart'),
+                                            ),
+                                          ],
+                                        ),
+                                        duration: const Duration(seconds: 2),
+                                        backgroundColor: AppColors.success,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  } else {
+                                    context.go('/cart');
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isInCart ? Icons.check_circle : Icons.add_shopping_cart,
+                                        size: 18,
+                                        color: isInCart ? Colors.white : AppColors.primary,
+                                      ),
+                                      if (isInCart) ...[
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Added',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

@@ -3,6 +3,7 @@ import '../models/product_model.dart';
 import '../models/order_model.dart';
 import '../models/user_model.dart';
 import '../models/address_model.dart';
+import '../models/category_model.dart';
 
 class SupabaseService {
   static final SupabaseClient _client = Supabase.instance.client;
@@ -13,6 +14,28 @@ class SupabaseService {
   SupabaseService._internal();
 
   SupabaseClient get client => _client;
+
+  // ==================== CATEGORY SERVICES ====================
+
+  /// Get all categories
+  Future<List<Map<String, dynamic>>> getAllCategories() async {
+    try {
+      print('🔄 Fetching categories from Supabase...');
+      
+      // Fetch categories - removed is_active filter as it doesn't exist in existing table
+      final response = await _client
+          .from('categories')
+          .select()
+          .order('name', ascending: true);
+
+      print('✅ Successfully fetched ${response.length} categories');
+      return List<Map<String, dynamic>>.from(response);
+    } catch (error) {
+      print('❌ Error in getAllCategories: $error');
+      print('ℹ️ Returning empty categories list');
+      return [];
+    }
+  }
 
   // ==================== PRODUCT SERVICES ====================
 
