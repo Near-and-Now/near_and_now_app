@@ -12,19 +12,21 @@ class AppTheme {
         surface: AppColors.surface,
         error: AppColors.error,
       ),
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: Colors.white,
       textTheme: GoogleFonts.interTextTheme(),
       
       // AppBar theme
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: const Color(0xFF333333),
         elevation: 0,
         centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.black.withOpacity(0.05),
         titleTextStyle: GoogleFonts.inter(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF333333),
         ),
       ),
       

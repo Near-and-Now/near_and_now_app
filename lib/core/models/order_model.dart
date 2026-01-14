@@ -229,5 +229,8 @@ class Order {
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
   }
+
+  // Computed getter for items count
+  int get computedItemsCount => items?.length ?? itemsCount ?? 0;
 }
 

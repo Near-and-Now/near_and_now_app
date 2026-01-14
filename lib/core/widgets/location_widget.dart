@@ -51,42 +51,35 @@ class LocationWidget extends ConsumerWidget {
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: const Color(0xFFF8F8F8),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: hasError ? AppColors.error.withOpacity(0.3) : AppColors.border,
+              color: const Color(0xFFE8E8E8),
+              width: 1,
             ),
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: hasError 
-                      ? AppColors.error.withOpacity(0.1) 
-                      : AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  isLoading 
-                      ? Icons.my_location 
-                      : (hasError ? Icons.location_off : Icons.location_on),
-                  color: hasError ? AppColors.error : AppColors.primary,
-                  size: 20,
-                ),
+              Icon(
+                isLoading 
+                    ? Icons.location_searching 
+                    : (hasError ? Icons.location_off_outlined : Icons.location_on_outlined),
+                color: hasError ? AppColors.error : AppColors.primary,
+                size: 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
-                      'Deliver to',
+                      'Delivery in 8 minutes',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF666666),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -98,7 +91,7 @@ class LocationWidget extends ConsumerWidget {
                             address,
                             style: const TextStyle(
                               fontSize: 14,
-                              color: AppColors.textPrimary,
+                              color: Color(0xFF333333),
                               fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
@@ -121,9 +114,9 @@ class LocationWidget extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               const Icon(
-                Icons.arrow_drop_down,
-                color: AppColors.textSecondary,
-                size: 24,
+                Icons.keyboard_arrow_down,
+                color: Color(0xFF666666),
+                size: 20,
               ),
             ],
           ),

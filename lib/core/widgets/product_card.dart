@@ -22,8 +22,10 @@ class ProductCard extends ConsumerWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [AppColors.shadowSm],
+          border: Border.all(
+            color: const Color(0xFFE8E8E8),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,19 +76,19 @@ class ProductCard extends ConsumerWidget {
                       left: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                          horizontal: 6,
+                          vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(6),
+                          color: const Color(0xFF0C831F),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           '${product.discountPercentage?.toStringAsFixed(0)}% OFF',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -120,7 +122,7 @@ class ProductCard extends ConsumerWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,9 +131,10 @@ class ProductCard extends ConsumerWidget {
                     Text(
                       product.name,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Color(0xFF333333),
+                        height: 1.3,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -139,98 +142,81 @@ class ProductCard extends ConsumerWidget {
                     // Price and add button
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              Formatters.formatCurrency(product.price),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            if (product.hasDiscount)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (product.hasDiscount)
+                                Text(
+                                  Formatters.formatCurrency(product.originalPrice!),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF999999),
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
                               Text(
-                                Formatters.formatCurrency(product.originalPrice!),
+                                Formatters.formatCurrency(product.price),
                                 style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textTertiary,
-                                  decoration: TextDecoration.lineThrough,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF333333),
                                 ),
                               ),
-                          ],
+                            ],
+                          ),
                         ),
                         // Add to cart button
                         if (product.inStock)
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                            decoration: BoxDecoration(
-                              color: isInCart ? AppColors.success : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isInCart ? AppColors.success : AppColors.primary,
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: (isInCart ? AppColors.success : AppColors.primary).withOpacity(0.2),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  if (!isInCart) {
-                                    ref.read(cartProvider.notifier).addItem(product);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.check_circle, color: Colors.white),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: Text('${product.name} added to cart'),
-                                            ),
-                                          ],
-                                        ),
-                                        duration: const Duration(seconds: 2),
-                                        backgroundColor: AppColors.success,
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                  } else {
-                                    context.go('/cart');
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(20),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        isInCart ? Icons.check_circle : Icons.add_shopping_cart,
-                                        size: 18,
-                                        color: isInCart ? Colors.white : AppColors.primary,
-                                      ),
-                                      if (isInCart) ...[
-                                        const SizedBox(width: 4),
-                                        const Text(
-                                          'Added',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                if (!isInCart) {
+                                  ref.read(cartProvider.notifier).addItem(product);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle, color: Colors.white),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text('${product.name} added to cart'),
                                           ),
-                                        ),
-                                      ],
-                                    ],
+                                        ],
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                      backgroundColor: const Color(0xFF0C831F),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                } else {
+                                  context.go('/cart');
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isInCart 
+                                      ? const Color(0xFF0C831F)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFF0C831F),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  isInCart ? 'ADDED' : 'ADD',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isInCart 
+                                        ? Colors.white
+                                        : const Color(0xFF0C831F),
                                   ),
                                 ),
                               ),

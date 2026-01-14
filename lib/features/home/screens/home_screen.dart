@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,21 +21,21 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 8,
+        titleSpacing: 16,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             // App Logo
             Image.asset(
               'assets/logo/Logo.png',
-              height: 36,
+              height: 32,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 // Fallback to emoji if image fails
-                return const Text('🏪', style: TextStyle(fontSize: 28));
+                return const Text('🏪', style: TextStyle(fontSize: 24));
               },
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             const Flexible(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -43,17 +44,10 @@ class HomeScreen extends ConsumerWidget {
                   Text(
                     'Near & Now',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF333333),
                     ),
-                  ),
-                  Text(
-                    'Digital Dukan, Local Dil Se',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -62,10 +56,18 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search_rounded, size: 24),
             onPressed: () => context.push('/search'),
+            color: const Color(0xFF333333),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFE8E8E8),
+            height: 1,
+          ),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -86,16 +88,17 @@ class HomeScreen extends ConsumerWidget {
               // Header Banner
               _buildHeaderBanner(context),
               
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               
               // Categories Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Shop by Category',
+                  'Shop by category',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF333333),
+                        fontSize: 20,
                       ),
                 ),
               ),
@@ -119,15 +122,23 @@ class HomeScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Featured Products',
+                      'Featured products',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF333333),
+                            fontSize: 20,
                           ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/shop'),
-                      child: const Text('View All'),
+                      child: Text(
+                        'See all',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -136,7 +147,7 @@ class HomeScreen extends ConsumerWidget {
               
               productsAsync.when(
                 data: (products) {
-                  final featured = products.take(6).toList();
+                  final featured = _getRotatedFeaturedProducts(products, 6);
                   return _buildProductsGrid(featured);
                 },
                 loading: () => const SizedBox(
@@ -160,47 +171,75 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildHeaderBanner(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [AppColors.shadowMd],
+        color: const Color(0xFFF8F8F8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8E8E8)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          const Text(
-            'Fresh Groceries',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Fresh groceries delivered',
+                  style: TextStyle(
+                    color: Color(0xFF333333),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'in minutes',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => context.go('/shop'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(color: AppColors.primary, width: 1.5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Shop now',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Delivered to your doorstep',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+          const SizedBox(width: 16),
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => context.go('/shop'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+            child: Icon(
+              Icons.shopping_basket_outlined,
+              size: 36,
+              color: AppColors.primary,
             ),
-            child: const Text('Shop Now'),
           ),
         ],
       ),
@@ -208,47 +247,44 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildCategoriesGrid(BuildContext context, List<Map<String, dynamic>> categories) {
-    return SizedBox(
-      height: 120,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 16,
+        ),
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
           final categoryName = category['name'] as String;
           final imageUrl = category['image_url'] as String?;
           
+          // Get category background color
+          final bgColor = _getCategoryColor(index);
+          
           return GestureDetector(
             onTap: () => context.push('/category/$categoryName'),
-            child: Container(
-              width: 100,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Category image or icon
-                  Container(
-                    width: 60,
-                    height: 60,
+            child: Column(
+              children: [
+                // Category image container
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFE8E8E8),
+                        width: 1,
+                      ),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       child: imageUrl != null && imageUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
@@ -257,39 +293,37 @@ class HomeScreen extends ConsumerWidget {
                                 child: Icon(
                                   _getCategoryIcon(categoryName),
                                   size: 32,
-                                  color: AppColors.primary,
+                                  color: const Color(0xFF999999),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Icon(
                                 _getCategoryIcon(categoryName),
                                 size: 32,
-                                color: AppColors.primary,
+                                color: const Color(0xFF999999),
                               ),
                             )
                           : Icon(
                               _getCategoryIcon(categoryName),
                               size: 32,
-                              color: AppColors.primary,
+                              color: const Color(0xFF999999),
                             ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      Formatters.formatCategoryName(categoryName),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                ),
+                const SizedBox(height: 6),
+                // Category name
+                Text(
+                  Formatters.formatCategoryName(categoryName),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF333333),
                   ),
-                ],
-              ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           );
         },
@@ -327,6 +361,41 @@ class HomeScreen extends ConsumerWidget {
     if (lower.contains('snack')) return Icons.cookie;
     if (lower.contains('beverage')) return Icons.coffee;
     return Icons.shopping_bag;
+  }
+
+  /// Get rotated featured products based on daily seed
+  /// This ensures all users see the same products each day, but they rotate daily
+  List _getRotatedFeaturedProducts(List products, int count) {
+    if (products.isEmpty) return [];
+    if (products.length <= count) return products;
+
+    // Create a copy to avoid modifying the original list
+    final productsCopy = List.from(products);
+    
+    // Use day of year as seed for consistent daily rotation
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    final seed = now.year * 1000 + dayOfYear;
+    
+    // Shuffle with the daily seed
+    productsCopy.shuffle(Random(seed));
+    
+    return productsCopy.take(count).toList();
+  }
+
+  /// Get background color for categories based on index
+  Color _getCategoryColor(int index) {
+    final colors = [
+      const Color(0xFFF5F5F5),
+      const Color(0xFFFFF8E1),
+      const Color(0xFFE8F5E9),
+      const Color(0xFFE3F2FD),
+      const Color(0xFFFCE4EC),
+      const Color(0xFFF3E5F5),
+      const Color(0xFFE0F2F1),
+      const Color(0xFFFFF3E0),
+    ];
+    return colors[index % colors.length];
   }
 }
 

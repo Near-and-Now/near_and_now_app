@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// App color palette matching the website design
+/// App color palette - Blinkit-inspired professional design
 class AppColors {
-  // Primary colors (Green theme)
-  static const Color primary = Color(0xFF059669); // Green-600
-  static const Color secondary = Color(0xFF047857); // Green-700
-  static const Color accent = Color(0xFF10b981); // Green-500
-  static const Color primaryLight = Color(0xFF34d399); // Green-400
-  static const Color primaryDark = Color(0xFF065f46); // Green-800
+  // Primary colors (Blinkit Green theme)
+  static const Color primary = Color(0xFF0C831F); // Blinkit Green
+  static const Color secondary = Color(0xFF0A6B1A); // Darker Green
+  static const Color accent = Color(0xFF10b981); // Accent Green
+  static const Color primaryLight = Color(0xFF34d399); // Light Green
+  static const Color primaryDark = Color(0xFF065f46); // Dark Green
   
   // Status colors
   static const Color success = Color(0xFF10B981);

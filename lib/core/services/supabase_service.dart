@@ -245,7 +245,6 @@ class SupabaseService {
         'subtotal': subtotal,
         'delivery_fee': deliveryFee,
         'items': items.map((item) => item.toJson()).toList(),
-        'items_count': items.length,
         'shipping_address': shippingAddress.toJson(),
         'order_number': orderNumber,
         'created_at': DateTime.now().toIso8601String(),
