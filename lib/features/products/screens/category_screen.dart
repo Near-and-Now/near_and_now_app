@@ -23,7 +23,7 @@ class CategoryScreen extends ConsumerWidget {
       body: productsAsync.when(
         data: (products) {
           if (products.isEmpty) {
-            return EmptyState(
+            return const EmptyState(
               icon: Icons.inventory_2_outlined,
               title: 'No Products',
               message: 'No products found in this category',

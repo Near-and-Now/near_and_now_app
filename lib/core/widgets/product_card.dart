@@ -221,7 +221,7 @@ class ProductCard extends ConsumerWidget {
                                       ),
                                       if (isInCart) ...[
                                         const SizedBox(width: 4),
-                                        Text(
+                                        const Text(
                                           'Added',
                                           style: TextStyle(
                                             color: Colors.white,

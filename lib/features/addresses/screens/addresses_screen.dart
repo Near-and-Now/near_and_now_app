@@ -43,7 +43,7 @@ class AddressesScreen extends ConsumerWidget {
       body: addressesAsync.when(
         data: (addresses) {
           if (addresses.isEmpty) {
-            return EmptyState(
+            return const EmptyState(
               icon: Icons.location_on_outlined,
               title: 'No Addresses',
               message: 'You haven\'t added any delivery addresses yet',

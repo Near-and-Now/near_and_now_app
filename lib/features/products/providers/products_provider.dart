@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/product_model.dart';
-import '../../../core/models/category_model.dart';
 import '../../../core/services/supabase_service.dart';
 
 // Products service provider

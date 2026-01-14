@@ -91,7 +91,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               loading: () => const LoadingIndicator(
                 message: 'Searching...',
               ),
-              error: (error, stack) => EmptyState(
+              error: (error, stack) => const EmptyState(
                 icon: Icons.error_outline,
                 title: 'Error',
                 message: 'Failed to search products',

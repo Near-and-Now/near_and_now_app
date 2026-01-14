@@ -285,18 +285,18 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
           // Header
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.border),
               ),
             ),
             child: Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Select Delivery Location',
                         style: TextStyle(
                           fontSize: 18,
@@ -304,7 +304,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
                         'Choose your delivery address',
                         style: TextStyle(
@@ -327,7 +327,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
           // Current Location Button
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.border),
               ),
@@ -398,7 +398,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
           // Search Box with Google Places API
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(color: AppColors.border),
               ),
@@ -407,8 +407,8 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search for area, street name, pincode...',
-                hintStyle: TextStyle(color: AppColors.textTertiary),
-                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
+                hintStyle: const TextStyle(color: AppColors.textTertiary),
+                prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
                 suffixIcon: _isSearching
                     ? const Padding(
                         padding: EdgeInsets.all(12),
@@ -434,7 +434,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                         : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border, width: 2),
+                  borderSide: const BorderSide(color: AppColors.border, width: 2),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -453,12 +453,12 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
               color: AppColors.error.withOpacity(0.1),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                  const Icon(Icons.error_outline, color: AppColors.error, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.error,
                       ),
@@ -494,14 +494,14 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
               color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(32),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.location_on_outlined,
               size: 32,
               color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             'No saved addresses',
             style: TextStyle(
               fontWeight: FontWeight.w600,
@@ -509,7 +509,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Search for a location or use current location',
             style: TextStyle(
               fontSize: 12,
@@ -527,7 +527,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
       shrinkWrap: true,
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
+        const Text(
           'SEARCH RESULTS',
           style: TextStyle(
             fontSize: 11,
@@ -548,7 +548,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
       padding: const EdgeInsets.all(16),
       children: [
         if (_savedAddresses.isNotEmpty && _searchController.text.isEmpty) ...[
-          Text(
+          const Text(
             'SAVED ADDRESSES',
             style: TextStyle(
               fontSize: 11,
@@ -606,7 +606,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                     const SizedBox(height: 2),
                     Text(
                       suggestion.secondaryText,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
@@ -617,7 +617,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                 ],
               ),
             ),
-            Icon(
+            const Icon(
               Icons.arrow_forward_ios,
               size: 16,
               color: AppColors.textTertiary,
@@ -673,7 +673,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                   const SizedBox(height: 2),
                   Text(
                     location.address,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),

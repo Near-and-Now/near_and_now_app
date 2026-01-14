@@ -45,9 +45,9 @@ class AboutScreen extends StatelessWidget {
             
             const SizedBox(height: 8),
             
-            Text(
+            const Text(
               'Version ${AppConfig.appVersion}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
               ),
@@ -123,9 +123,9 @@ class AboutScreen extends StatelessWidget {
             
             const SizedBox(height: 32),
             
-            Text(
+            const Text(
               '© 2024 ${AppConfig.appName}. All rights reserved.',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 color: AppColors.textTertiary,
               ),

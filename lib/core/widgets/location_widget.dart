@@ -82,7 +82,7 @@ class LocationWidget extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Deliver to',
                       style: TextStyle(
                         fontSize: 11,
@@ -120,7 +120,7 @@ class LocationWidget extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
+              const Icon(
                 Icons.arrow_drop_down,
                 color: AppColors.textSecondary,
                 size: 24,

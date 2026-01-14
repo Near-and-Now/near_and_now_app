@@ -3,7 +3,6 @@ import '../models/product_model.dart';
 import '../models/order_model.dart';
 import '../models/user_model.dart';
 import '../models/address_model.dart';
-import '../models/category_model.dart';
 
 class SupabaseService {
   static final SupabaseClient _client = Supabase.instance.client;
