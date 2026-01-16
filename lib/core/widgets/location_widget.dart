@@ -49,27 +49,41 @@ class LocationWidget extends ConsumerWidget {
             },
           );
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F8F8),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFE8E8E8),
+              color: const Color(0xFFE0E0E0),
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Row(
             children: [
-              Icon(
-                isLoading 
-                    ? Icons.location_searching 
-                    : (hasError ? Icons.location_off_outlined : Icons.location_on_outlined),
-                color: hasError ? AppColors.error : AppColors.primary,
-                size: 20,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isLoading 
+                      ? Icons.location_searching 
+                      : (hasError ? Icons.location_off_outlined : Icons.location_on),
+                  color: hasError ? AppColors.error : AppColors.primary,
+                  size: 20,
+                ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,20 +93,21 @@ class LocationWidget extends ConsumerWidget {
                       'Delivery in 8 minutes',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF666666),
+                        color: Color(0xFF999999),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             address,
                             style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF333333),
-                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              color: Color(0xFF1A1A1A),
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -113,10 +128,10 @@ class LocationWidget extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(
-                Icons.keyboard_arrow_down,
-                color: Color(0xFF666666),
-                size: 20,
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.primary,
+                size: 24,
               ),
             ],
           ),

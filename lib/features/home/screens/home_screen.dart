@@ -22,49 +22,59 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
+        toolbarHeight: 64,
         title: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
             // App Logo
-            Image.asset(
-              'assets/logo/Logo.png',
-              height: 32,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback to emoji if image fails
-                return const Text('🏪', style: TextStyle(fontSize: 24));
-              },
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Image.asset(
+                'assets/logo/Logo.png',
+                height: 24,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback to emoji if image fails
+                  return const Text('🏪', style: TextStyle(fontSize: 20));
+                },
+              ),
             ),
-            const SizedBox(width: 10),
-            const Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Near & Now',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 12),
+            const Text(
+              'Near & Now',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF1A1A1A),
+                letterSpacing: -0.5,
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search_rounded, size: 24),
-            onPressed: () => context.push('/search'),
-            color: const Color(0xFF333333),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.notifications_outlined, size: 22),
+            ),
+            onPressed: () {
+              // TODO: Navigate to notifications
+            },
+            color: const Color(0xFF1A1A1A),
           ),
+          const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: const Color(0xFFE8E8E8),
+            color: const Color(0xFFF0F0F0),
             height: 1,
           ),
         ),
@@ -81,25 +91,41 @@ class HomeScreen extends ConsumerWidget {
             children: [
               // Location widget
               const Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 20),
                 child: LocationWidget(),
               ),
               
-              // Header Banner
-              _buildHeaderBanner(context),
+              // Search bar
+              _buildSearchBar(context),
               
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
               
               // Categories Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Shop by category',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF333333),
-                        fontSize: 20,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Categories',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A1A),
+                            fontSize: 22,
+                          ),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go('/shop'),
+                      child: Text(
+                        'View All',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -118,29 +144,13 @@ class HomeScreen extends ConsumerWidget {
               // Featured Products Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Featured products',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF333333),
-                            fontSize: 20,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/shop'),
-                      child: Text(
-                        'See all',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                child: Text(
+                  'Popular',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1A1A1A),
+                        fontSize: 22,
                       ),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -168,85 +178,44 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderBanner(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8E8E8)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Fresh groceries delivered',
-                  style: TextStyle(
-                    color: Color(0xFF333333),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    height: 1.3,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'in minutes',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => context.go('/shop'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary, width: 1.5),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Shop now',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+  Widget _buildSearchBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GestureDetector(
+        onTap: () => context.push('/search'),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(width: 16),
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.shopping_basket_outlined,
-              size: 36,
-              color: AppColors.primary,
-            ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search_rounded,
+                color: Colors.grey[600],
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Search products...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildCategoriesGrid(BuildContext context, List<Map<String, dynamic>> categories) {
+    // Show only first 8 categories for cleaner look
+    final displayCategories = categories.length > 8 ? categories.sublist(0, 8) : categories;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GridView.builder(
@@ -254,13 +223,13 @@ class HomeScreen extends ConsumerWidget {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.78,
           crossAxisSpacing: 12,
           mainAxisSpacing: 16,
         ),
-        itemCount: categories.length,
+        itemCount: displayCategories.length,
         itemBuilder: (context, index) {
-          final category = categories[index];
+          final category = displayCategories[index];
           final categoryName = category['name'] as String;
           final imageUrl = category['image_url'] as String?;
           
@@ -271,53 +240,55 @@ class HomeScreen extends ConsumerWidget {
             onTap: () => context.push('/category/$categoryName'),
             child: Column(
               children: [
-                // Category image container
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFE8E8E8),
-                        width: 1,
+                // Category image container with shadow
+                Container(
+                  width: double.infinity,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: bgColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: imageUrl != null && imageUrl.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Center(
-                                child: Icon(
-                                  _getCategoryIcon(categoryName),
-                                  size: 32,
-                                  color: const Color(0xFF999999),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => Icon(
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: Icon(
                                 _getCategoryIcon(categoryName),
-                                size: 32,
-                                color: const Color(0xFF999999),
+                                size: 36,
+                                color: Colors.white.withOpacity(0.8),
                               ),
-                            )
-                          : Icon(
-                              _getCategoryIcon(categoryName),
-                              size: 32,
-                              color: const Color(0xFF999999),
                             ),
-                    ),
+                            errorWidget: (context, url, error) => Icon(
+                              _getCategoryIcon(categoryName),
+                              size: 36,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          )
+                        : Icon(
+                            _getCategoryIcon(categoryName),
+                            size: 36,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 // Category name
                 Text(
                   Formatters.formatCategoryName(categoryName),
                   style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF333333),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1A1A),
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -339,9 +310,9 @@ class HomeScreen extends ConsumerWidget {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          childAspectRatio: 0.72,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
@@ -383,17 +354,17 @@ class HomeScreen extends ConsumerWidget {
     return productsCopy.take(count).toList();
   }
 
-  /// Get background color for categories based on index
+  /// Get vibrant background color for categories based on index
   Color _getCategoryColor(int index) {
     final colors = [
-      const Color(0xFFF5F5F5),
-      const Color(0xFFFFF8E1),
-      const Color(0xFFE8F5E9),
-      const Color(0xFFE3F2FD),
-      const Color(0xFFFCE4EC),
-      const Color(0xFFF3E5F5),
-      const Color(0xFFE0F2F1),
-      const Color(0xFFFFF3E0),
+      const Color(0xFFFFB3BA), // Soft Pink
+      const Color(0xFFFFDFBA), // Peach
+      const Color(0xFFFFFFBA), // Light Yellow
+      const Color(0xFFBAFFC9), // Mint Green
+      const Color(0xFFBAE1FF), // Sky Blue
+      const Color(0xFFE7BAFF), // Lavender
+      const Color(0xFFFFBAE3), // Rose
+      const Color(0xFFBAFFD4), // Aqua
     ];
     return colors[index % colors.length];
   }

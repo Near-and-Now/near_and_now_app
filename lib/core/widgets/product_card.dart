@@ -21,11 +21,14 @@ class ProductCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: const Color(0xFFE8E8E8),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +40,7 @@ class ProductCard extends ConsumerWidget {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
+                      top: Radius.circular(16),
                     ),
                     child: product.displayImage.isNotEmpty
                         ? CachedNetworkImage(
@@ -46,25 +49,25 @@ class ProductCard extends ConsumerWidget {
                             height: double.infinity,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: AppColors.surfaceVariant,
+                              color: const Color(0xFFF5F5F5),
                               child: const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: AppColors.surfaceVariant,
+                              color: const Color(0xFFF5F5F5),
                               child: const Icon(
                                 Icons.image_not_supported,
-                                color: AppColors.textTertiary,
+                                color: Color(0xFFCCCCCC),
                                 size: 40,
                               ),
                             ),
                           )
                         : Container(
-                            color: AppColors.surfaceVariant,
+                            color: const Color(0xFFF5F5F5),
                             child: const Icon(
                               Icons.image_not_supported,
-                              color: AppColors.textTertiary,
+                              color: Color(0xFFCCCCCC),
                               size: 40,
                             ),
                           ),
@@ -100,7 +103,7 @@ class ProductCard extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.5),
                           borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(12),
+                            top: Radius.circular(16),
                           ),
                         ),
                         child: const Center(
@@ -119,113 +122,109 @@ class ProductCard extends ConsumerWidget {
               ),
             ),
             // Details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Name
-                    Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Name
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A1A),
+                      height: 1.2,
                     ),
-                    // Price and add button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (product.hasDiscount)
-                                Text(
-                                  Formatters.formatCurrency(product.originalPrice!),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Color(0xFF999999),
-                                    decoration: TextDecoration.lineThrough,
-                                  ),
-                                ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // Price and add button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (product.hasDiscount)
                               Text(
-                                Formatters.formatCurrency(product.price),
+                                Formatters.formatCurrency(product.originalPrice!),
                                 style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF333333),
+                                  fontSize: 11,
+                                  color: Color(0xFF999999),
+                                  decoration: TextDecoration.lineThrough,
                                 ),
                               ),
-                            ],
-                          ),
+                            Text(
+                              Formatters.formatCurrency(product.price),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1A1A1A),
+                              ),
+                            ),
+                          ],
                         ),
-                        // Add to cart button
-                        if (product.inStock)
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                if (!isInCart) {
-                                  ref.read(cartProvider.notifier).addItem(product);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          const Icon(Icons.check_circle, color: Colors.white),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text('${product.name} added to cart'),
-                                          ),
-                                        ],
-                                      ),
-                                      duration: const Duration(seconds: 2),
-                                      backgroundColor: const Color(0xFF0C831F),
-                                      behavior: SnackBarBehavior.floating,
+                      ),
+                      // Add to cart button
+                      if (product.inStock)
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              if (!isInCart) {
+                                ref.read(cartProvider.notifier).addItem(product);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        const Icon(Icons.check_circle, color: Colors.white),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text('${product.name} added to cart'),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                } else {
-                                  context.go('/cart');
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isInCart 
-                                      ? const Color(0xFF0C831F)
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: const Color(0xFF0C831F),
-                                    width: 1.5,
+                                    duration: const Duration(seconds: 2),
+                                    backgroundColor: const Color(0xFF0C831F),
+                                    behavior: SnackBarBehavior.floating,
                                   ),
+                                );
+                              } else {
+                                context.go('/cart');
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isInCart 
+                                    ? const Color(0xFF0C831F)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(0xFF0C831F),
+                                  width: 2,
                                 ),
-                                child: Text(
-                                  isInCart ? 'ADDED' : 'ADD',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isInCart 
-                                        ? Colors.white
-                                        : const Color(0xFF0C831F),
-                                  ),
-                                ),
+                              ),
+                              child: Icon(
+                                isInCart ? Icons.check : Icons.add,
+                                size: 16,
+                                color: isInCart 
+                                    ? Colors.white
+                                    : const Color(0xFF0C831F),
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  ],
-                ),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
