@@ -4,79 +4,62 @@ import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
-    return ThemeData(
+    final baseTheme = ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
         error: AppColors.error,
+        onSurface: AppColors.textPrimary,
       ),
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: AppColors.background,
       textTheme: GoogleFonts.interTextTheme(),
-      
-      // AppBar theme
+    );
+
+    return baseTheme.copyWith(
+      // AppBar theme - Modern, flat, and clean
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF333333),
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: false,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withOpacity(0.05),
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: const Color(0xFF333333),
+          color: AppColors.textPrimary,
         ),
       ),
       
-      // Button themes
+      // Card theme - Consistent radius and very subtle border
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border, width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+      ),
+
+      // Button themes - Rounded and punchy
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      
-      // Input decoration theme
+      // Input decoration - Modern "filled and outlined" look
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -88,59 +71,18 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
-        ),
-        labelStyle: GoogleFonts.inter(
-          color: AppColors.textSecondary,
-          fontSize: 14,
-        ),
-        hintStyle: GoogleFonts.inter(
-          color: AppColors.textTertiary,
-          fontSize: 14,
-        ),
+        hintStyle: GoogleFonts.inter(color: AppColors.textTertiary, fontSize: 14),
       ),
-      
-      // Card theme
-      cardTheme: CardThemeData(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.border),
-        ),
-        color: Colors.white,
-      ),
-      
-      // Bottom navigation bar theme
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textTertiary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
-        selectedLabelStyle: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      
-      // Divider theme
-      dividerTheme: const DividerThemeData(
-        color: AppColors.border,
-        thickness: 1,
+
+      // SnackBar theme - Floating and clean
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.textPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        contentTextStyle: GoogleFonts.inter(color: Colors.white),
       ),
     );
   }
 }
-
