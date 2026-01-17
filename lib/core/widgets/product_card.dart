@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../models/product_model.dart';
-import '../theme/app_colors.dart';
 import '../../features/cart/providers/cart_provider.dart';
 import '../utils/formatters.dart';
 

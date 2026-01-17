@@ -128,7 +128,7 @@ class LocationWidget extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
+              const Icon(
                 Icons.keyboard_arrow_down_rounded,
                 color: AppColors.primary,
                 size: 24,

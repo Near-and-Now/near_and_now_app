@@ -116,7 +116,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () => context.go('/shop'),
-                      child: Text(
+                      child: const Text(
                         'View All',
                         style: TextStyle(
                           color: AppColors.primary,
