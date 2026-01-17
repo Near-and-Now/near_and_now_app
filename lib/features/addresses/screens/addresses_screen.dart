@@ -11,7 +11,7 @@ import '../../auth/providers/auth_provider.dart';
 final userAddressesProvider = FutureProvider<List<Address>>((ref) async {
   final user = await ref.read(authServiceProvider).getCurrentUser();
   if (user == null) return [];
-  
+
   return await SupabaseService().getUserAddresses(user.id);
 });
 
@@ -75,24 +75,59 @@ class AddressesScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const LoadingIndicator(message: 'Loading addresses...'),
+        loading: () => const LoadingIndicator(message: 'Loading your addresses...'),
         error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 60,
-                color: AppColors.error,
-              ),
-              const SizedBox(height: 16),
-              Text('Failed to load addresses: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(userAddressesProvider),
-                child: const Text('Retry'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cloud_off_outlined,
+                    size: 60,
+                    color: AppColors.error,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Unable to Load Addresses',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'We couldn\'t fetch your saved addresses. Please check your internet connection and try again.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => ref.invalidate(userAddressesProvider),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

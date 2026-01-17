@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/cart/providers/cart_provider.dart';
+import '../../features/home/providers/home_scroll_provider.dart';
 import '../theme/app_colors.dart';
 
 class MainNavigation extends ConsumerStatefulWidget {
@@ -18,18 +19,31 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
 
   final List<String> _routes = [
     '/',
+    '/categories',
     '/shop',
     '/cart',
-    '/profile',
   ];
 
   void _onTap(int index) {
-    if (index == _currentIndex) return;
-    
+    // Update index first
     setState(() {
       _currentIndex = index;
     });
-    
+
+    // If tapping home button while already on home, scroll to top
+    if (index == 0) {
+      // Always navigate to home first
+      context.go(_routes[index]);
+      // Then scroll to top if the controller is available
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          ref.read(homeScrollNotifierProvider.notifier).scrollToTop();
+        }
+      });
+      return;
+    }
+
+    // For other tabs, just navigate
     context.go(_routes[index]);
   }
 
@@ -52,18 +66,24 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
             label: 'Home',
           ),
           const BottomNavigationBarItem(
+            icon: Icon(Icons.category_outlined),
+            activeIcon: Icon(Icons.category),
+            label: 'Categories',
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.store_outlined),
             activeIcon: Icon(Icons.store),
             label: 'Shop',
           ),
           BottomNavigationBarItem(
             icon: Stack(
+              clipBehavior: Clip.none,
               children: [
                 const Icon(Icons.shopping_cart_outlined),
                 if (cartCount > 0)
                   Positioned(
-                    right: 0,
-                    top: 0,
+                    right: -4,
+                    top: -4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
@@ -71,14 +91,14 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
+                        minWidth: 14,
+                        minHeight: 14,
                       ),
                       child: Text(
                         cartCount > 99 ? '99+' : '$cartCount',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -88,12 +108,13 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
               ],
             ),
             activeIcon: Stack(
+              clipBehavior: Clip.none,
               children: [
                 const Icon(Icons.shopping_cart),
                 if (cartCount > 0)
                   Positioned(
-                    right: 0,
-                    top: 0,
+                    right: -4,
+                    top: -4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
@@ -101,14 +122,14 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
+                        minWidth: 14,
+                        minHeight: 14,
                       ),
                       child: Text(
                         cartCount > 99 ? '99+' : '$cartCount',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -118,11 +139,6 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
               ],
             ),
             label: 'Cart',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
           ),
         ],
       ),
