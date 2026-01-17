@@ -12,7 +12,7 @@ import '../../auth/providers/auth_provider.dart';
 final userOrdersProvider = FutureProvider<List<Order>>((ref) async {
   final user = await ref.read(authServiceProvider).getCurrentUser();
   if (user == null) return [];
-  
+
   return await SupabaseService().getUserOrders(
     userId: user.id,
     userPhone: user.phone,
@@ -70,24 +70,59 @@ class OrdersScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const LoadingIndicator(message: 'Loading orders...'),
+        loading: () => const LoadingIndicator(message: 'Loading your orders...'),
         error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 60,
-                color: AppColors.error,
-              ),
-              const SizedBox(height: 16),
-              Text('Failed to load orders: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(userOrdersProvider),
-                child: const Text('Retry'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cloud_off_outlined,
+                    size: 60,
+                    color: AppColors.error,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Unable to Load Orders',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'We couldn\'t fetch your orders. Please check your internet connection and try again.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => ref.invalidate(userOrdersProvider),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -129,9 +164,9 @@ class OrderCard extends StatelessWidget {
               _buildStatusBadge(order.orderStatus),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Order Date
           Row(
             children: [
@@ -146,9 +181,9 @@ class OrderCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Items Count
           if (order.items != null)
             Row(
@@ -164,9 +199,9 @@ class OrderCard extends StatelessWidget {
                 ),
               ],
             ),
-          
+
           const Divider(height: 24),
-          
+
           // Order Total & Payment Status
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -195,7 +230,7 @@ class OrderCard extends StatelessWidget {
               _buildPaymentStatusBadge(order.paymentStatus),
             ],
           ),
-          
+
           // Order Items (if available)
           if (order.items != null && order.items!.isNotEmpty) ...[
             const SizedBox(height: 16),
@@ -236,7 +271,7 @@ class OrderCard extends StatelessWidget {
   Widget _buildStatusBadge(OrderStatus status) {
     Color bgColor;
     Color textColor;
-    
+
     switch (status) {
       case OrderStatus.placed:
         bgColor = AppColors.badgeBlue;
@@ -280,7 +315,7 @@ class OrderCard extends StatelessWidget {
   Widget _buildPaymentStatusBadge(PaymentStatus status) {
     Color bgColor;
     Color textColor;
-    
+
     switch (status) {
       case PaymentStatus.pending:
         bgColor = AppColors.badgeYellow;

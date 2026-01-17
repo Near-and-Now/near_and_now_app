@@ -5,6 +5,7 @@ import '../../features/home/screens/home_screen.dart';
 import '../../features/shop/screens/shop_screen.dart';
 import '../../features/cart/screens/cart_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/categories/screens/categories_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/products/screens/product_detail_screen.dart';
@@ -20,22 +21,22 @@ import '../widgets/main_navigation.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Watch authentication state
   final isAuthenticated = ref.watch(isAuthenticatedProvider);
-  
+
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
       final isLoggingIn = state.matchedLocation == '/login';
-      
+
       // If not authenticated and not already on login page, redirect to login
       if (!isAuthenticated && !isLoggingIn) {
         return '/login';
       }
-      
+
       // If authenticated and on login page, redirect to home
       if (isAuthenticated && isLoggingIn) {
         return '/';
       }
-      
+
       // No redirect needed
       return null;
     },
@@ -51,6 +52,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'home',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: HomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/categories',
+            name: 'categories',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CategoriesScreen(),
             ),
           ),
           GoRoute(
@@ -76,7 +84,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      
+
       // Standalone screens
       GoRoute(
         path: '/login',

@@ -74,29 +74,61 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
             loading: () => const SizedBox(height: 50),
             error: (_, __) => const SizedBox(),
           ),
-          
+
           // Products grid
           Expanded(
             child: productsAsync.when(
               data: (products) {
                 var filteredProducts = products;
-                
+
                 // Filter by category
                 if (_selectedCategory != null) {
                   filteredProducts = products
                       .where((p) => p.category == _selectedCategory)
                       .toList();
                 }
-                
+
                 // Sort products
                 filteredProducts = _sortProducts(filteredProducts);
-                
+
                 if (filteredProducts.isEmpty) {
-                  return const Center(
-                    child: Text('No products found'),
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 80,
+                            color: AppColors.textTertiary.withOpacity(0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'No Products Found',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _selectedCategory != null
+                                ? 'No products available in this category'
+                                : 'No products available at the moment',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }
-                
+
                 return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(allProductsProvider);
@@ -117,11 +149,61 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
                 );
               },
               loading: () => const LoadingIndicator(
-                message: 'Loading products...',
+                message: 'Loading fresh products...',
               ),
-              error: (error, stack) => ErrorView(
-                message: 'Failed to load products',
-                onRetry: () => ref.invalidate(allProductsProvider),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.cloud_off_outlined,
+                          size: 60,
+                          color: AppColors.error,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Unable to Load Products',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'We couldn\'t fetch the products. Please check your internet connection and try again.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => ref.invalidate(allProductsProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -175,7 +257,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
 
   List<Product> _sortProducts(List<Product> products) {
     final sorted = List<Product>.from(products);
-    
+
     switch (_sortOption) {
       case SortOption.featured:
         // Keep original order (featured)
@@ -193,7 +275,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         sorted.sort((a, b) => b.name.compareTo(a.name));
         break;
     }
-    
+
     return sorted;
   }
 }
