@@ -6,10 +6,7 @@ class PlacesService {
   // IMPORTANT: Replace with your Android-specific API key
   // Current key has HTTP referrer restrictions (for website only)
   // See instructions below to create Android API key
-  static const String _apiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: 'YOUR_ANDROID_API_KEY_HERE', // Replace this!
-  );
+  static const String _apiKey = 'AIzaSyC15Y8u7pn9_diCH6Cb1x73pA5RAwIjuLo'; // Google Maps API Key
   
   static const String _autocompleteUrl = 
       'https://maps.googleapis.com/maps/api/place/autocomplete/json';
@@ -31,7 +28,7 @@ class PlacesService {
         'input': query,
         'key': _apiKey,
         'components': 'country:in', // Restrict to India
-        'types': 'address|establishment|geocode',
+        'types': 'geocode', // Changed from 'address|establishment|geocode' to just 'geocode'
       });
 
       final response = await http.get(url);

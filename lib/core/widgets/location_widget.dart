@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_colors.dart';
 import '../providers/location_provider.dart';
 import 'location_picker_sheet.dart';
@@ -14,16 +15,19 @@ class LocationWidget extends ConsumerWidget {
     return addressAsync.when(
       data: (data) => _buildLocationDisplay(
         context,
+        ref,
         address: data?['address'] ?? 'Select location',
         isLoading: false,
       ),
       loading: () => _buildLocationDisplay(
         context,
+        ref,
         address: 'Detecting location...',
         isLoading: true,
       ),
       error: (error, _) => _buildLocationDisplay(
         context,
+        ref,
         address: 'Select location',
         isLoading: false,
         hasError: true,
@@ -32,7 +36,8 @@ class LocationWidget extends ConsumerWidget {
   }
 
   Widget _buildLocationDisplay(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required String address,
     required bool isLoading,
     bool hasError = false,
@@ -40,11 +45,19 @@ class LocationWidget extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           showLocationPicker(
             context: context,
-            onLocationSelect: (location) {
-              // Update location in provider if needed
+            onLocationSelect: (location) async {
+              // Save manually selected location to SharedPreferences - THIS TAKES PRIORITY!
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('manual_location_address', location.address);
+              await prefs.setDouble('manual_location_lat', location.lat);
+              await prefs.setDouble('manual_location_lng', location.lng);
+              
+              // Invalidate the provider to refresh with new manual location
+              ref.invalidate(locationWithAddressProvider);
+              
               print('Location selected: ${location.address}');
             },
           );
