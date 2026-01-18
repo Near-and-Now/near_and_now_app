@@ -14,7 +14,11 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isInCart = ref.watch(cartProvider).any((item) => item.product.id == product.id);
+    final cart = ref.watch(cartProvider);
+    final isInCart = cart.any((item) => item.product.id == product.id);
+    final quantity = isInCart
+        ? cart.firstWhere((item) => item.product.id == product.id).quantity
+        : 0;
 
     return GestureDetector(
       onTap: () => context.push('/product/${product.id}'),
@@ -150,37 +154,96 @@ class ProductCard extends ConsumerWidget {
                         ],
                       ),
 
-                      // Add Button - Professional "Outlined" style that fills when added
-                      SizedBox(
-                        height: 32,
-                        width: 64,
-                        child: OutlinedButton(
-                          onPressed: () {
-                             if (!isInCart) {
-                                ref.read(cartProvider.notifier).addItem(product);
-                             } else {
-                                context.go('/cart');
-                             }
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            side: BorderSide(
-                              color: isInCart ? AppColors.primary : AppColors.primary.withOpacity(0.5),
-                              width: 1,
+                      // Add Button or Quantity Controls
+                      if (!isInCart)
+                        SizedBox(
+                          height: 32,
+                          width: 64,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              ref.read(cartProvider.notifier).addItem(product);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              side: BorderSide(
+                                color: AppColors.primary.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                            backgroundColor: isInCart ? AppColors.primary : Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: const Text(
+                              'ADD',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            isInCart ? 'ADDED' : 'ADD',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: isInCart ? Colors.white : AppColors.primary,
-                            ),
+                        )
+                      else
+                        Container(
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Decrease button
+                              InkWell(
+                                onTap: () {
+                                  if (quantity > 1) {
+                                    ref.read(cartProvider.notifier).updateQuantity(product.id, quantity - 1);
+                                  } else {
+                                    ref.read(cartProvider.notifier).removeItem(product.id);
+                                  }
+                                },
+                                child: Container(
+                                  width: 28,
+                                  height: 32,
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.remove,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              // Quantity display
+                              Container(
+                                constraints: const BoxConstraints(minWidth: 28),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$quantity',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              // Increase button
+                              InkWell(
+                                onTap: () {
+                                  ref.read(cartProvider.notifier).updateQuantity(product.id, quantity + 1);
+                                },
+                                child: Container(
+                                  width: 28,
+                                  height: 32,
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.add,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ],

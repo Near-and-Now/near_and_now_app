@@ -20,7 +20,7 @@ class SupabaseService {
   Future<List<Map<String, dynamic>>> getAllCategories() async {
     try {
       print('🔄 Fetching categories from Supabase...');
-      
+
       // Fetch categories - removed is_active filter as it doesn't exist in existing table
       final response = await _client
           .from('categories')
@@ -263,7 +263,7 @@ class SupabaseService {
       print('   Order ID: ${createdOrder.id}');
       print('   Order Number: ${createdOrder.orderNumber}');
       print('   Stored with phone: ${createdOrder.customerPhone}');
-      
+
       return createdOrder;
     } catch (error, stackTrace) {
       print('❌ Error in createOrder: $error');
@@ -315,7 +315,7 @@ class SupabaseService {
               .order('created_at', ascending: false);
 
           print('   Found ${response.length} orders by user_id');
-          
+
           for (var orderJson in response) {
             try {
               final order = Order.fromJson(orderJson);
@@ -343,7 +343,7 @@ class SupabaseService {
               .order('created_at', ascending: false);
 
           print('   Found ${response.length} orders by phone (exact: $userPhone)');
-          
+
           for (var orderJson in response) {
             try {
               final order = Order.fromJson(orderJson);
@@ -370,7 +370,7 @@ class SupabaseService {
                 .order('created_at', ascending: false);
 
             print('   Found ${response.length} orders by phone (without +91: $phoneWithoutPrefix)');
-            
+
             for (var orderJson in response) {
               try {
                 final order = Order.fromJson(orderJson);
@@ -385,7 +385,7 @@ class SupabaseService {
           } catch (queryError) {
             print('   ⚠️ Error querying by phone without prefix: $queryError');
           }
-        } 
+        }
         // If phone doesn't have +91, also try with it
         else if (!userPhone.startsWith('+')) {
           final phoneWithPrefix = '+91$userPhone';
@@ -397,7 +397,7 @@ class SupabaseService {
                 .order('created_at', ascending: false);
 
             print('   Found ${response.length} orders by phone (with +91: $phoneWithPrefix)');
-            
+
             for (var orderJson in response) {
               try {
                 final order = Order.fromJson(orderJson);
@@ -425,7 +425,7 @@ class SupabaseService {
               .order('created_at', ascending: false);
 
           print('   Found ${response.length} orders by email');
-          
+
           for (var orderJson in response) {
             try {
               final order = Order.fromJson(orderJson);
@@ -574,6 +574,21 @@ class SupabaseService {
       print('❌ Error in updateAddress: $error');
       rethrow;
     }
+  }
+
+  /// Add address (helper method that accepts a Map)
+  Future<Address> addAddress(Map<String, dynamic> addressData) async {
+    return await createAddress(
+      userId: addressData['user_id'] as String,
+      name: addressData['name'] as String,
+      addressLine1: addressData['address_line1'] as String,
+      addressLine2: addressData['address_line2'] as String?,
+      city: addressData['city'] as String,
+      state: addressData['state'] as String,
+      pincode: addressData['pincode'] as String,
+      phone: addressData['phone'] as String,
+      isDefault: addressData['is_default'] as bool? ?? false,
+    );
   }
 
   /// Delete address

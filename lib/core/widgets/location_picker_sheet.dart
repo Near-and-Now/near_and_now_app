@@ -6,7 +6,11 @@ import 'dart:async';
 import '../theme/app_colors.dart';
 import '../services/location_service.dart';
 import '../services/places_service.dart';
+import '../services/supabase_service.dart';
 import '../config/app_config.dart';
+import '../models/address_model.dart';
+import '../../features/addresses/widgets/add_address_form.dart';
+import '../../features/auth/providers/auth_provider.dart';
 
 class LocationData {
   final String address;
@@ -61,10 +65,11 @@ class LocationPickerSheet extends ConsumerStatefulWidget {
 class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
   final TextEditingController _searchController = TextEditingController();
   final PlacesService _placesService = PlacesService();
-  List<LocationData> _savedAddresses = [];
+  List<Address> _savedAddresses = [];
   List<PlaceSuggestion> _searchSuggestions = [];
   bool _isLoadingCurrentLocation = false;
   bool _isSearching = false;
+  bool _isLoadingAddresses = false;
   String? _errorMessage;
   Timer? _debounceTimer;
 
@@ -108,7 +113,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
 
     try {
       final suggestions = await _placesService.searchPlaces(query);
-      
+
       if (mounted) {
         setState(() {
           _searchSuggestions = suggestions;
@@ -134,7 +139,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
 
     try {
       final locationData = await _placesService.getPlaceDetails(suggestion.placeId);
-      
+
       if (locationData != null) {
         _handleLocationSelect(locationData);
       } else {
@@ -152,19 +157,35 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
   }
 
   Future<void> _loadSavedAddresses() async {
+    setState(() {
+      _isLoadingAddresses = true;
+    });
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final saved = prefs.getString('savedAddresses');
-      if (saved != null) {
-        final List<dynamic> decoded = json.decode(saved);
-        setState(() {
-          _savedAddresses = decoded
-              .map((item) => LocationData.fromJson(item as Map<String, dynamic>))
-              .toList();
-        });
+      final user = await ref.read(authServiceProvider).getCurrentUser();
+      if (user != null) {
+        final addresses = await SupabaseService().getUserAddresses(user.id);
+        if (mounted) {
+          setState(() {
+            _savedAddresses = addresses;
+            _isLoadingAddresses = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _savedAddresses = [];
+            _isLoadingAddresses = false;
+          });
+        }
       }
     } catch (e) {
       print('❌ Error loading saved addresses: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingAddresses = false;
+        });
+      }
     }
   }
 
@@ -176,7 +197,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
 
     try {
       final locationService = LocationService();
-      
+
       // Check permission
       final hasPermission = await locationService.checkLocationPermission();
       if (!hasPermission) {
@@ -189,7 +210,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
 
       // Get location with address
       final locationData = await locationService.getLocationWithAddress();
-      
+
       if (locationData != null) {
         final location = LocationData(
           address: locationData['address'] as String? ?? 'Unknown location',
@@ -199,12 +220,7 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
           lng: locationData['longitude'] as double,
         );
 
-        await _saveAddress(location);
-        widget.onLocationSelect(location);
-        
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        _handleLocationSelect(location);
       } else {
         setState(() {
           _errorMessage = 'Could not detect location. Please try searching manually.';
@@ -232,40 +248,21 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
     return 'Unknown';
   }
 
-  Future<void> _saveAddress(LocationData location) async {
-    try {
-      final saved = [..._savedAddresses];
-      
-      // Check if address already exists
-      final existingIndex = saved.indexWhere(
-        (addr) => addr.address == location.address,
-      );
-
-      if (existingIndex == -1) {
-        saved.insert(0, location);
-        
-        // Keep only last MAX_SAVED_ADDRESSES
-        if (saved.length > AppConfig.maxSavedAddresses) {
-          saved.removeLast();
-        }
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(
-          'savedAddresses',
-          json.encode(saved.map((e) => e.toJson()).toList()),
-        );
-
-        setState(() {
-          _savedAddresses = saved;
-        });
-      }
-    } catch (e) {
-      print('❌ Error saving address: $e');
+  void _handleLocationSelect(LocationData location) async {
+    widget.onLocationSelect(location);
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 
-  void _handleLocationSelect(LocationData location) async {
-    await _saveAddress(location);
+  void _handleAddressSelect(Address address) async {
+    final location = LocationData(
+      address: address.fullAddress,
+      city: address.city,
+      pincode: address.pincode,
+      lat: 0.0, // You might want to add lat/lng to Address model
+      lng: 0.0,
+    );
     widget.onLocationSelect(location);
     if (mounted) {
       Navigator.pop(context);
@@ -547,6 +544,87 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
       shrinkWrap: true,
       padding: const EdgeInsets.all(16),
       children: [
+        // Add New Address Button
+        if (_searchController.text.isEmpty) ...[
+          InkWell(
+            onTap: () {
+              showAddAddressForm(
+                context: context,
+                onAddressAdded: (addressData) async {
+                  // Reload saved addresses from database
+                  await _loadSavedAddresses();
+                  // Convert address data to LocationData
+                  final newLocation = LocationData(
+                    address: '${addressData['address_line1']}, ${addressData['address_line2']}, ${addressData['city']}',
+                    city: addressData['city'] as String,
+                    pincode: addressData['pincode'] as String,
+                    lat: 0.0, // You might want to geocode this
+                    lng: 0.0,
+                  );
+                  _handleLocationSelect(newLocation);
+                },
+              );
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.primary, width: 2),
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.primary.withOpacity(0.05),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Add New Address',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Enter complete delivery address',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        // Saved Addresses Section
         if (_savedAddresses.isNotEmpty && _searchController.text.isEmpty) ...[
           const Text(
             'SAVED ADDRESSES',
@@ -628,11 +706,11 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
     );
   }
 
-  Widget _buildAddressItem(LocationData location) {
-    final isSelected = widget.currentLocation?.address == location.address;
+  Widget _buildAddressItem(Address address) {
+    final isSelected = widget.currentLocation?.address == address.fullAddress;
 
     return InkWell(
-      onTap: () => _handleLocationSelect(location),
+      onTap: () => _handleAddressSelect(address),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -640,21 +718,22 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
         decoration: BoxDecoration(
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
+                color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.location_on,
-                size: 16,
+                size: 20,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),
             ),
@@ -664,21 +743,36 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${location.city} ${location.pincode}',
+                    address.name,
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                       color: isSelected ? AppColors.primary : AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
-                    location.address,
+                    address.fullAddress,
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone, size: 12, color: AppColors.textTertiary),
+                      const SizedBox(width: 4),
+                      Text(
+                        address.phone,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -687,7 +781,23 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
               const Icon(
                 Icons.check_circle,
                 color: AppColors.primary,
-                size: 20,
+                size: 24,
+              )
+            else if (address.isDefault)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.badgeGreen,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'Default',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.badgeGreenText,
+                  ),
+                ),
               ),
           ],
         ),
