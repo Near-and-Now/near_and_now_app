@@ -144,7 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _buildSectionHeader(
                     context,
                     title: 'Shop by Category',
-                    onViewAll: () => context.go('/shop')
+                    onViewAll: () => context.go('/categories')
                   ),
                   const SizedBox(height: 8),
 

@@ -171,7 +171,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final subtotal = ref.watch(cartTotalProvider);
     final deliveryFee = ref.watch(deliveryFeeProvider);
     final total = ref.watch(grandTotalProvider);
-    final suggestedProductsAsync = ref.watch(allProductsProvider);
+    
+    // Get categories from cart items for related product recommendations
+    final cartCategories = cartItems
+        .map((item) => item.product.category)
+        .toSet()
+        .toList();
+    
+    final suggestedProductsAsync = ref.watch(relatedProductsProvider(cartCategories));
 
     return Scaffold(
       appBar: AppBar(
@@ -596,8 +603,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildSuggestedProductsSection(List<Product> allProducts) {
-    // Get random 10 products as suggestions
-    final suggested = allProducts.take(10).toList();
+    final cartItems = ref.watch(cartProvider);
+    final cartProductIds = cartItems.map((item) => item.product.id).toSet();
+    
+    // Filter out products already in cart and get up to 10 suggestions
+    final suggested = allProducts
+        .where((product) => !cartProductIds.contains(product.id))
+        .take(10)
+        .toList();
 
     if (suggested.isEmpty) return const SizedBox.shrink();
 

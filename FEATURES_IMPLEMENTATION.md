@@ -120,6 +120,43 @@ Manual address selection now takes precedence over automatic GPS detection.
 - Created secure run script for development
 - Added API key files to `.gitignore`
 
+### 7. Product Randomization & Smart Recommendations ✅ NEW
+
+**Features:**
+- Products randomized on each app session
+- Different product order every time app is opened/user logs in
+- Smart recommendations in checkout based on cart contents
+- Related products from same categories as cart items
+- Filters out products already in cart
+- Falls back to random products if no related items found
+
+**Implementation:**
+- Created `_rawProductsProvider` for unshuffled product data
+- `allProductsProvider` now shuffles products on each fetch
+- New `relatedProductsProvider` analyzes cart categories
+- Checkout screen uses related products instead of random
+- Supplements with random products if needed (up to 10 items)
+
+**Files Modified:**
+- `lib/features/products/providers/products_provider.dart`
+- `lib/features/checkout/screens/checkout_screen.dart`
+
+**Benefits:**
+- Better user experience with variety
+- Increased product discovery
+- More relevant recommendations
+- Higher chance of additional purchases
+
+### 8. Navigation Improvement ✅ NEW
+
+**Fix:**
+- "See All" button next to "Shop by Category" now navigates to Categories tab
+- Changed from `/shop` to `/categories` route
+- Better user flow and consistency
+
+**Files Modified:**
+- `lib/features/home/screens/home_screen.dart`
+
 **Files Modified:**
 - `lib/core/config/app_config.dart` - Added `googleMapsApiKey` with `String.fromEnvironment()`
 - `lib/core/services/places_service.dart` - Now reads from AppConfig
@@ -169,11 +206,14 @@ flutter build apk --dart-define=GOOGLE_MAPS_API_KEY=your_key --release
 - [x] Address geocoding works ✅
 - [x] Location caching functions ✅
 - [x] All linter checks pass ✅
-- [x] Google Places API working ✅ NEW
-- [x] Address autocomplete working ✅ NEW
-- [x] Manual location priority working ✅ NEW
-- [x] API keys secured ✅ NEW
-- [x] Tested on real device ✅ NEW
+- [x] Google Places API working ✅
+- [x] Address autocomplete working ✅
+- [x] Manual location priority working ✅
+- [x] API keys secured ✅
+- [x] Tested on real device ✅
+- [x] Product randomization working ✅ NEW
+- [x] Related products in checkout ✅ NEW
+- [x] "See All" navigation fixed ✅ NEW
 - [ ] Cart operations (in progress)
 - [ ] Authentication flow (pending)
 - [ ] Order placement (pending)
