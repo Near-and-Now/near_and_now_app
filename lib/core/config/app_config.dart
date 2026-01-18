@@ -5,6 +5,14 @@ class AppConfig {
   static const String supabaseAnonKey = 
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wYnN6eW15dWJ4YXZqb3hoemZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyOTc5OTQsImV4cCI6MjA2OTg3Mzk5NH0.NnHFwGCkNpTWorV8O6vgn6uuqYPRek1QK4Sk_rcqLOg';
   
+  // Google Maps API Key
+  // TODO: Move to environment variables or secure storage for production
+  // For now, using const - Replace with String.fromEnvironment() or flutter_dotenv
+  static const String googleMapsApiKey = String.fromEnvironment(
+    'GOOGLE_MAPS_API_KEY',
+    defaultValue: '', // Empty by default - must be provided at build time
+  );
+  
   // App constants
   static const String appName = 'Near & Now';
   static const String appVersion = '1.0.0';

@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../widgets/location_picker_sheet.dart';
+import '../config/app_config.dart';
 
 class PlacesService {
-  // IMPORTANT: Replace with your Android-specific API key
-  // Current key has HTTP referrer restrictions (for website only)
-  // See instructions below to create Android API key
-  static const String _apiKey = 'AIzaSyC15Y8u7pn9_diCH6Cb1x73pA5RAwIjuLo'; // Google Maps API Key
+  // API key is stored securely in AppConfig
+  // For production, use environment variables or secure storage
+  static String get _apiKey => AppConfig.googleMapsApiKey;
   
   static const String _autocompleteUrl = 
       'https://maps.googleapis.com/maps/api/place/autocomplete/json';

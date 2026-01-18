@@ -17,6 +17,10 @@ migrate_working_dir/
 .env.*
 !.env.example
 
+# Scripts with API keys (security)
+run_with_api_key.bat
+run_with_api_key.sh
+
 # IntelliJ related
 *.iml
 *.ipr
