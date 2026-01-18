@@ -2,6 +2,16 @@
 
 A complete Flutter e-commerce mobile application for the Near & Now grocery delivery platform, built with Flutter, Riverpod, and Supabase.
 
+## 🎉 Current Status
+
+**✅ App is functional and running on real devices!**
+
+- Build Status: ✅ Success
+- Tested on: Samsung S928B (Android 16)
+- Location Services: ✅ Working (GPS + Google Places API)
+- API Security: ✅ Implemented
+- Progress: 85% Complete
+
 ## 🚀 Features
 
 ### Core Features
@@ -14,7 +24,15 @@ A complete Flutter e-commerce mobile application for the Near & Now grocery deli
 - ✅ **User Authentication**: OTP-based phone authentication via Supabase
 - ✅ **User Profile**: View and manage user profile
 - ✅ **Address Management**: Save and manage delivery addresses
+- ✅ **Location Services**: GPS detection and address geocoding ✅ TESTED
+- ✅ **Google Places API**: Address autocomplete search ✅ WORKING
 - ✅ **Responsive Design**: Optimized for both Android and iOS
+
+### Advanced Features
+- ✅ **Location Priority System**: Manual address selection overrides GPS
+- ✅ **Secure API Key Management**: Environment-based configuration
+- ✅ **Real-time Location**: Tested on real Android devices
+- ✅ **Address Persistence**: Locations saved across app restarts
 
 ### UI/UX Features
 - Modern Material Design 3 with custom theme
@@ -53,7 +71,10 @@ dependencies:
   cached_network_image: ^3.3.0      # Image caching
   google_fonts: ^6.1.0              # Typography
   shared_preferences: ^2.2.2        # Local storage
-  hive_flutter: ^1.1.0              # Local database
+  geolocator: ^14.0.2               # GPS location (WORKING)
+  geocoding: ^4.0.0                 # Address conversion (WORKING)
+  google_maps_flutter: ^2.5.0       # Maps integration
+  http: ^1.2.0                      # Google Places API
   pinput: ^3.0.1                    # OTP input
   intl: ^0.18.1                     # Internationalization
 ```
@@ -161,16 +182,32 @@ static const String supabaseUrl = 'https://mpbszymyubxavjoxhzfm.supabase.co';
 static const String supabaseAnonKey = '[ANON_KEY]';
 ```
 
-### 4. Run the App
+### 4. Configure Google Maps API Key (REQUIRED)
+
+**Security Note:** API keys are NOT hardcoded. Use the secure method:
+
+#### Option 1: Use the provided script (Recommended)
 ```bash
-# For Android
-flutter run
+.\run_with_api_key.bat
+```
 
-# For iOS
-flutter run
+#### Option 2: Manual command
+```bash
+flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_api_key_here
+```
 
-# For web (not recommended for mobile apps)
-flutter run -d chrome
+**For detailed security setup, see:** `SECURITY_GUIDE.md`
+
+### 5. Run the App
+```bash
+# For Android (with API key)
+.\run_with_api_key.bat
+
+# Or manually:
+flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_key
+
+# For specific device:
+flutter run --dart-define=GOOGLE_MAPS_API_KEY=your_key -d device-id
 ```
 
 ## 🎨 Design System
@@ -247,17 +284,17 @@ context.pushNamed('productDetail', params: {'id': productId});
 
 ### Android
 ```bash
-# Build APK
-flutter build apk --release
+# Build APK (with API key)
+flutter build apk --dart-define=GOOGLE_MAPS_API_KEY=your_key --release
 
 # Build App Bundle (for Play Store)
-flutter build appbundle --release
+flutter build appbundle --dart-define=GOOGLE_MAPS_API_KEY=your_key --release
 ```
 
 ### iOS
 ```bash
-# Build IPA
-flutter build ios --release
+# Build IPA (with API key)
+flutter build ios --dart-define=GOOGLE_MAPS_API_KEY=your_key --release
 
 # Or use Xcode for final build
 open ios/Runner.xcworkspace
@@ -311,12 +348,44 @@ flutter pub upgrade
 - Check SharedPreferences permissions
 - Clear app data and try again
 
+**Issue**: Google Places API not working
+- Verify API key is passed with `--dart-define`
+- Check API restrictions in Google Cloud Console
+- See `FIX_API_KEY_ERROR.md` for detailed troubleshooting
+- Use `.\run_with_api_key.bat` script
+
+**Issue**: Location services not working
+- Grant location permissions
+- Enable GPS on device
+- For emulator, set mock location
+- See `SECURITY_GUIDE.md` for configuration
+
+## 🔒 Security
+
+**Important:** This project uses secure API key management.
+
+- API keys are NOT hardcoded in source code
+- Use `--dart-define` for all builds
+- Never commit API keys to git
+- See `SECURITY_GUIDE.md` for complete documentation
+- Use provided `run_with_api_key.bat` script for development
+
 ## 📚 Additional Resources
 
+### Documentation
+- [SECURITY_GUIDE.md](SECURITY_GUIDE.md) - API key security
+- [CURRENT_STATUS_AND_NEXT_STEPS.md](CURRENT_STATUS_AND_NEXT_STEPS.md) - Project status
+- [TODO.md](TODO.md) - Task tracking
+- [FEATURES_IMPLEMENTATION.md](FEATURES_IMPLEMENTATION.md) - Feature details
+- [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) - Testing guide
+- [FIX_API_KEY_ERROR.md](FIX_API_KEY_ERROR.md) - API troubleshooting
+
+### External Resources
 - [Flutter Documentation](https://flutter.dev/docs)
 - [Riverpod Documentation](https://riverpod.dev)
 - [Supabase Documentation](https://supabase.com/docs)
 - [GoRouter Documentation](https://pub.dev/packages/go_router)
+- [Google Places API](https://developers.google.com/maps/documentation/places/web-service)
 
 ## 🤝 Contributing
 
