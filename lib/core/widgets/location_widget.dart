@@ -54,10 +54,10 @@ class LocationWidget extends ConsumerWidget {
               await prefs.setString('manual_location_address', location.address);
               await prefs.setDouble('manual_location_lat', location.lat);
               await prefs.setDouble('manual_location_lng', location.lng);
-              
+
               // Invalidate the provider to refresh with new manual location
               ref.invalidate(locationWithAddressProvider);
-              
+
               print('Location selected: ${location.address}');
             },
           );
@@ -89,8 +89,8 @@ class LocationWidget extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  isLoading 
-                      ? Icons.location_searching 
+                  isLoading
+                      ? Icons.location_searching
                       : (hasError ? Icons.location_off_outlined : Icons.location_on),
                   color: hasError ? AppColors.error : AppColors.primary,
                   size: 20,
