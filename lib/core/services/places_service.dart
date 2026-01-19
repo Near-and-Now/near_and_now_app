@@ -194,6 +194,39 @@ class PlacesService {
       return null;
     }
   }
+
+  /// Reverse geocode coordinates to get address
+  Future<LocationData?> reverseGeocode(double lat, double lng) async {
+    try {
+      print('🔄 Reverse geocoding: $lat, $lng');
+      
+      final url = Uri.parse(_geocodeUrl).replace(queryParameters: {
+        'latlng': '$lat,$lng',
+        'key': _apiKey,
+      });
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        if (data['status'] == 'OK') {
+          final results = data['results'] as List;
+          if (results.isNotEmpty) {
+            print('✅ Reverse geocoding successful');
+            return _parseGooglePlace(results[0]);
+          }
+        } else {
+          print('❌ Reverse geocoding error: ${data['status']}');
+        }
+      }
+      
+      return null;
+    } catch (e) {
+      print('❌ Error reverse geocoding: $e');
+      return null;
+    }
+  }
 }
 
 class PlaceSuggestion {

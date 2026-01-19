@@ -11,6 +11,7 @@ import '../config/app_config.dart';
 import '../models/address_model.dart';
 import '../../features/addresses/widgets/add_address_form.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import 'map_location_picker.dart';
 
 class LocationData {
   final String address;
@@ -141,7 +142,15 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
       final locationData = await _placesService.getPlaceDetails(suggestion.placeId);
 
       if (locationData != null) {
-        _handleLocationSelect(locationData);
+        // Show map picker to confirm/adjust location
+        if (mounted) {
+          Navigator.pop(context); // Close current sheet
+          showMapLocationPicker(
+            context: context,
+            initialLocation: locationData,
+            onLocationConfirmed: widget.onLocationSelect,
+          );
+        }
       } else {
         setState(() {
           _errorMessage = 'Could not get location details. Please try another address.';
@@ -220,7 +229,15 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
           lng: locationData['longitude'] as double,
         );
 
-        _handleLocationSelect(location);
+        // Show map picker to confirm/adjust location
+        if (mounted) {
+          Navigator.pop(context); // Close current sheet
+          showMapLocationPicker(
+            context: context,
+            initialLocation: location,
+            onLocationConfirmed: widget.onLocationSelect,
+          );
+        }
       } else {
         setState(() {
           _errorMessage = 'Could not detect location. Please try searching manually.';
@@ -256,16 +273,56 @@ class _LocationPickerSheetState extends ConsumerState<LocationPickerSheet> {
   }
 
   void _handleAddressSelect(Address address) async {
-    final location = LocationData(
-      address: address.fullAddress,
-      city: address.city,
-      pincode: address.pincode,
-      lat: 0.0, // You might want to add lat/lng to Address model
-      lng: 0.0,
-    );
-    widget.onLocationSelect(location);
-    if (mounted) {
-      Navigator.pop(context);
+    // Geocode the saved address to get coordinates
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final locationData = await _placesService.geocodeAddress(address.fullAddress);
+
+      if (locationData != null && mounted) {
+        // Show map picker to confirm/adjust location
+        Navigator.pop(context); // Close current sheet
+        showMapLocationPicker(
+          context: context,
+          initialLocation: locationData,
+          onLocationConfirmed: widget.onLocationSelect,
+        );
+      } else {
+        // Fallback: use address without map
+        final location = LocationData(
+          address: address.fullAddress,
+          city: address.city,
+          pincode: address.pincode,
+          lat: 0.0,
+          lng: 0.0,
+        );
+        widget.onLocationSelect(location);
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      // Fallback: use address without map
+      final location = LocationData(
+        address: address.fullAddress,
+        city: address.city,
+        pincode: address.pincode,
+        lat: 0.0,
+        lng: 0.0,
+      );
+      widget.onLocationSelect(location);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
     }
   }
 

@@ -63,39 +63,62 @@ final categoryNamesProvider = FutureProvider<List<String>>((ref) async {
   );
 });
 
-// Related products provider based on cart items
-// Returns products from the same categories as items in cart
-final relatedProductsProvider = FutureProvider.family<List<Product>, List<String>>(
-  (ref, cartCategories) async {
-    if (cartCategories.isEmpty) {
-      // If cart is empty, return random products
-      return await ref.watch(allProductsProvider.future);
+// Simple related products provider - shows products from same categories as cart items
+// This uses the already-loaded products instead of fetching again
+final relatedProductsProvider = Provider.family<List<Product>, List<String>>(
+  (ref, cartCategories) {
+    print('🎯 relatedProductsProvider called');
+    print('📂 Cart categories: $cartCategories');
+    
+    // Get the already-loaded products (synchronously from cache)
+    final allProductsAsync = ref.watch(_rawProductsProvider);
+    
+    // If still loading, return empty list
+    if (!allProductsAsync.hasValue) {
+      print('⏳ Products still loading...');
+      return [];
     }
     
-    final allProducts = await ref.watch(_rawProductsProvider.future);
+    final allProducts = allProductsAsync.value ?? [];
+    print('📦 Total products available: ${allProducts.length}');
     
-    // Filter products that match cart categories
-    final relatedProducts = allProducts.where((product) {
-      return cartCategories.contains(product.category);
-    }).toList();
+    // If cart is empty, return first 10 products
+    if (cartCategories.isEmpty) {
+      print('⚠️ Cart is empty, returning first 10 products');
+      final result = allProducts.take(10).toList();
+      print('✅ Returning ${result.length} products');
+      return result;
+    }
+    
+    // Filter products from same categories as cart items
+    final relatedProducts = allProducts
+        .where((product) => cartCategories.contains(product.category) && product.inStock)
+        .toList();
+    
+    print('🔍 Found ${relatedProducts.length} products in cart categories');
     
     // Shuffle for variety
     relatedProducts.shuffle(Random());
     
-    // If we have enough related products, return them
+    // If we have enough products from same categories, return them
     if (relatedProducts.length >= 10) {
-      return relatedProducts.take(10).toList();
+      final result = relatedProducts.take(10).toList();
+      print('✅ Returning ${result.length} products from cart categories');
+      return result;
     }
     
-    // Otherwise, supplement with random products
-    final remaining = allProducts.where((product) {
-      return !cartCategories.contains(product.category);
-    }).toList();
-    remaining.shuffle(Random());
+    // Otherwise, add more products from other categories to reach 10
+    final otherProducts = allProducts
+        .where((product) => !cartCategories.contains(product.category) && product.inStock)
+        .toList();
+    otherProducts.shuffle(Random());
     
-    return [
+    final result = [
       ...relatedProducts,
-      ...remaining.take(10 - relatedProducts.length),
+      ...otherProducts.take(10 - relatedProducts.length),
     ];
+    
+    print('✅ Returning ${result.length} products (${relatedProducts.length} from cart categories + ${result.length - relatedProducts.length} others)');
+    return result;
   },
 );

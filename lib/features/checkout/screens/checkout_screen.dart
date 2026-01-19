@@ -27,21 +27,50 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _selectedAddress;
   String _paymentMethod = 'COD';
   bool _isLoading = false;
+  String? _receiverName;
+  String? _receiverPhone;
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedAddress();
+    _loadSavedData();
   }
 
-  Future<void> _loadSelectedAddress() async {
+  Future<void> _loadSavedData() async {
     final prefs = await SharedPreferences.getInstance();
     final address = prefs.getString('manual_location_address');
-    if (mounted && address != null) {
+    final receiverName = prefs.getString('receiver_name');
+    final receiverPhone = prefs.getString('receiver_phone');
+    
+    if (mounted) {
       setState(() {
         _selectedAddress = address;
+        _receiverName = receiverName;
+        _receiverPhone = receiverPhone;
       });
     }
+  }
+
+  Future<void> _saveReceiverDetails(String name, String phone) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('receiver_name', name);
+    await prefs.setString('receiver_phone', phone);
+    
+    setState(() {
+      _receiverName = name;
+      _receiverPhone = phone;
+    });
+  }
+
+  Future<void> _clearReceiverDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('receiver_name');
+    await prefs.remove('receiver_phone');
+    
+    setState(() {
+      _receiverName = null;
+      _receiverPhone = null;
+    });
   }
 
   Future<void> _placeOrder() async {
@@ -178,7 +207,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         .toSet()
         .toList();
     
-    final suggestedProductsAsync = ref.watch(relatedProductsProvider(cartCategories));
+    final suggestedProducts = ref.watch(relatedProductsProvider(cartCategories));
 
     return Scaffold(
       appBar: AppBar(
@@ -194,6 +223,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Section 0: Recipient Info
+                  _buildRecipientInfoSection(),
+
+                  const SizedBox(height: 8),
+
                   // Section 1: Delivery Location
                   _buildDeliveryLocationSection(),
 
@@ -210,13 +244,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   const SizedBox(height: 8),
 
                   // Section 3: Suggested Products
-                  suggestedProductsAsync.when(
-                    data: (products) => _buildSuggestedProductsSection(products),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
+                  _buildSuggestedProductsSection(suggestedProducts),
 
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 8),
+
+                  // Section 4: Ordering for someone else
+                  _buildOrderForSomeoneElseSection(),
+
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -603,57 +638,65 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Widget _buildSuggestedProductsSection(List<Product> allProducts) {
+    print('🎨 Building suggestions section with ${allProducts.length} products');
+    
     final cartItems = ref.watch(cartProvider);
     final cartProductIds = cartItems.map((item) => item.product.id).toSet();
     
-    // Filter out products already in cart and get up to 10 suggestions
+    print('🛒 Cart has ${cartItems.length} items with IDs: $cartProductIds');
+    
+    // Filter out products already in cart
     final suggested = allProducts
         .where((product) => !cartProductIds.contains(product.id))
-        .take(10)
         .toList();
 
-    if (suggested.isEmpty) return const SizedBox.shrink();
+    print('💡 After filtering cart items: ${suggested.length} suggestions');
+
+    if (suggested.isEmpty) {
+      print('⚠️ No suggestions to show - section hidden');
+      return const SizedBox.shrink();
+    }
+    
+    print('✅ Showing ${suggested.length} suggestions');
 
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.recommend,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+          // Header - matching style of other sections
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'You May Also Like',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                child: const Icon(
+                  Icons.favorite_border,
+                  color: AppColors.primary,
+                  size: 20,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'You Might Also Like',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
+          // Horizontal scrollable product list
           SizedBox(
             height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: suggested.length,
               itemBuilder: (context, index) {
                 return Container(
@@ -667,6 +710,330 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRecipientInfoSection() {
+    return FutureBuilder(
+      future: ref.read(authServiceProvider).getCurrentUser(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final displayName = _receiverName ?? user?.name ?? 'Guest';
+        final displayPhone = _receiverPhone ?? user?.phone ?? '';
+
+        return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Delivering to',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (displayPhone.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    displayPhone,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (_receiverName != null)
+            IconButton(
+              onPressed: _clearReceiverDetails,
+              icon: const Icon(Icons.close, size: 20),
+              tooltip: 'Clear receiver details',
+              color: AppColors.textSecondary,
+            ),
+        ],
+      ),
+    );
+      },
+    );
+  }
+
+  Widget _buildOrderForSomeoneElseSection() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.card_giftcard,
+              color: AppColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Ordering for someone else?',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _showReceiverDetailsBottomSheet,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Add Details',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReceiverDetailsBottomSheet() {
+    final nameController = TextEditingController(text: _receiverName ?? '');
+    final phoneController = TextEditingController(text: _receiverPhone ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.person_add,
+                        color: AppColors.primary,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Receiver Details',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Add recipient information',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Name Field
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Receiver Name',
+                    hintText: 'Enter full name',
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter receiver name';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Phone Field
+                TextFormField(
+                  controller: phoneController,
+                  decoration: InputDecoration(
+                    labelText: 'Receiver Phone',
+                    hintText: 'Enter 10-digit mobile number',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    prefix: const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Text(
+                        '+91 ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter receiver phone number';
+                    }
+                    if (value.length != 10) {
+                      return 'Phone number must be 10 digits';
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Save Button
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      _saveReceiverDetails(
+                        nameController.text.trim(),
+                        '+91${phoneController.text.trim()}',
+                      );
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text('Receiver details added'),
+                            ],
+                          ),
+                          backgroundColor: AppColors.success,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Save Details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
